@@ -23,8 +23,7 @@ streaming = [
 dashboard = [
   "streamlit>=1.36.0",
   "pandas>=2.2.0",
-  "plotly>=5.22.0",
-  "deltalake>=0.18.0",
+  "pyarrow>=16.1.0",
 ]
 snowflake = [
   "snowflake-connector-python>=3.11.0",

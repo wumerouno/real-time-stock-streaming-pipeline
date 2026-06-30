@@ -78,6 +78,24 @@ services:
     profiles:
       - runtime
 
+  dashboard:
+    image: python:3.11-slim
+    container_name: stock-dashboard
+    working_dir: /opt/stock-pipeline
+    volumes:
+      - ./:/opt/stock-pipeline
+    ports:
+      - "8501:8501"
+    environment:
+      PYTHONUNBUFFERED: "1"
+      STREAMLIT_SERVER_HEADLESS: "true"
+      STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
+    command: >
+      sh -c "python -m pip install --only-binary=:all: -r requirements-dashboard.txt &&
+      streamlit run dashboard/streamlit_app.py --server.address=0.0.0.0 --server.port=8501"
+    profiles:
+      - dashboard
+
   spark-master:
     image: apache/spark:3.5.1
     container_name: stock-spark-master
