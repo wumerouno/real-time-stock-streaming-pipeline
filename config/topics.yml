@@ -1,0 +1,29 @@
+topics:
+  stock-trades:
+    partitions: 6
+    replication_factor: 1
+    config:
+      cleanup.policy: delete
+      retention.ms: "604800000"
+      min.insync.replicas: "1"
+  stock-trades-dlq:
+    partitions: 3
+    replication_factor: 1
+    config:
+      cleanup.policy: delete
+      retention.ms: "1209600000"
+      min.insync.replicas: "1"
+  stock-anomalies:
+    partitions: 3
+    replication_factor: 1
+    config:
+      cleanup.policy: delete
+      retention.ms: "604800000"
+      min.insync.replicas: "1"
+  stock-aggregates:
+    partitions: 3
+    replication_factor: 1
+    config:
+      cleanup.policy: compact
+      min.insync.replicas: "1"
+

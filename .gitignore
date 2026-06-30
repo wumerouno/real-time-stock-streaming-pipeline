@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Runtime data
+data/checkpoints/
+data/delta/
+data/metrics/
+data/raw/
+*.db
+*.sqlite*
+*.log
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+*.pem
+*.p8
+*.key
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Airflow local state
+airflow/logs/
+airflow/plugins/
+airflow/airflow.db
+

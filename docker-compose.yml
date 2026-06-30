@@ -1,0 +1,140 @@
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: stock-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: stock-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+      - "9101:9101"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    container_name: stock-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+
+  topic-init:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: stock-topic-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    command: >
+      bash -c "
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic stock-trades --partitions 6 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic stock-trades-dlq --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic stock-anomalies --partitions 3 --replication-factor 1 &&
+      kafka-topics --bootstrap-server kafka:29092 --create --if-not-exists --topic stock-aggregates --partitions 3 --replication-factor 1 --config cleanup.policy=compact"
+
+  producer:
+    image: python:3.12-slim
+    container_name: stock-producer
+    depends_on:
+      kafka:
+        condition: service_healthy
+    working_dir: /opt/stock-pipeline
+    volumes:
+      - ./:/opt/stock-pipeline
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      EVENT_RATE_PER_SECOND: 100
+    command: >
+      sh -c "python -m pip install --quiet -e . &&
+      python -m stock_streaming_pipeline.producer --bootstrap-servers kafka:29092 --rate $${EVENT_RATE_PER_SECOND}"
+    profiles:
+      - runtime
+
+  spark-master:
+    image: bitnami/spark:3.5.1
+    container_name: stock-spark-master
+    environment:
+      SPARK_MODE: master
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DELTA_ROOT: /opt/stock-pipeline/data/delta
+      CHECKPOINT_ROOT: /opt/stock-pipeline/data/checkpoints
+      SPARK_RPC_AUTHENTICATION_ENABLED: "no"
+      SPARK_RPC_ENCRYPTION_ENABLED: "no"
+      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: "no"
+      SPARK_SSL_ENABLED: "no"
+    ports:
+      - "7077:7077"
+      - "8081:8080"
+    volumes:
+      - ./:/opt/stock-pipeline
+
+  spark-worker:
+    image: bitnami/spark:3.5.1
+    container_name: stock-spark-worker
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DELTA_ROOT: /opt/stock-pipeline/data/delta
+      CHECKPOINT_ROOT: /opt/stock-pipeline/data/checkpoints
+      SPARK_WORKER_MEMORY: 2G
+      SPARK_WORKER_CORES: 2
+      SPARK_RPC_AUTHENTICATION_ENABLED: "no"
+      SPARK_RPC_ENCRYPTION_ENABLED: "no"
+      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: "no"
+      SPARK_SSL_ENABLED: "no"
+    volumes:
+      - ./:/opt/stock-pipeline
+
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    container_name: stock-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: stock-grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+volumes:
+  grafana-storage:
