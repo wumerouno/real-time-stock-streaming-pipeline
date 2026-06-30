@@ -78,17 +78,13 @@ services:
       - runtime
 
   spark-master:
-    image: bitnami/spark:3.5.1
+    image: apache/spark:3.5.1
     container_name: stock-spark-master
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.master.Master", "--host", "spark-master"]
     environment:
-      SPARK_MODE: master
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       DELTA_ROOT: /opt/stock-pipeline/data/delta
       CHECKPOINT_ROOT: /opt/stock-pipeline/data/checkpoints
-      SPARK_RPC_AUTHENTICATION_ENABLED: "no"
-      SPARK_RPC_ENCRYPTION_ENABLED: "no"
-      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: "no"
-      SPARK_SSL_ENABLED: "no"
     ports:
       - "7077:7077"
       - "8081:8080"
@@ -96,22 +92,17 @@ services:
       - ./:/opt/stock-pipeline
 
   spark-worker:
-    image: bitnami/spark:3.5.1
+    image: apache/spark:3.5.1
     container_name: stock-spark-worker
     depends_on:
       - spark-master
+    command: ["/opt/spark/bin/spark-class", "org.apache.spark.deploy.worker.Worker", "spark://spark-master:7077"]
     environment:
-      SPARK_MODE: worker
-      SPARK_MASTER_URL: spark://spark-master:7077
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       DELTA_ROOT: /opt/stock-pipeline/data/delta
       CHECKPOINT_ROOT: /opt/stock-pipeline/data/checkpoints
       SPARK_WORKER_MEMORY: 2G
       SPARK_WORKER_CORES: 2
-      SPARK_RPC_AUTHENTICATION_ENABLED: "no"
-      SPARK_RPC_ENCRYPTION_ENABLED: "no"
-      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: "no"
-      SPARK_SSL_ENABLED: "no"
     volumes:
       - ./:/opt/stock-pipeline
 
