@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Real-Time Stock Streaming Pipeline Architecture</title>
+  <desc id="desc">Architecture diagram showing stock event production, Kafka topics, Spark Structured Streaming, Delta Lake medallion storage, Streamlit dashboard, Snowflake, and Airflow batch reconciliation.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .panel { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.4; rx: 10; }
+      .stage-title { fill: #0f172a; font: 700 19px Arial, sans-serif; }
+      .label { fill: #0f172a; font: 700 17px Arial, sans-serif; }
+      .small { fill: #334155; font: 13px Arial, sans-serif; }
+      .tiny { fill: #475569; font: 12px Arial, sans-serif; }
+      .arrow { stroke: #2563eb; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .arrow-soft { stroke: #64748b; stroke-width: 2.4; fill: none; stroke-dasharray: 7 6; marker-end: url(#arrow-soft); }
+      .badge { fill: #eef2ff; stroke: #818cf8; stroke-width: 1; rx: 13; }
+      .producer { fill: #dcfce7; stroke: #22c55e; }
+      .kafka { fill: #fef3c7; stroke: #f59e0b; }
+      .spark { fill: #fee2e2; stroke: #ef4444; }
+      .delta { fill: #dbeafe; stroke: #3b82f6; }
+      .serve { fill: #ede9fe; stroke: #8b5cf6; }
+      .ops { fill: #e0f2fe; stroke: #0284c7; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb" />
+    </marker>
+    <marker id="arrow-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="760" />
+  <text x="48" y="54" class="stage-title">Real-Time Stock Market Streaming Pipeline</text>
+  <text x="48" y="80" class="small">Kafka ingestion, Spark Structured Streaming, medallion Delta outputs, Snowflake validation assets, and dashboard evidence.</text>
+
+  <rect x="42" y="118" width="206" height="132" class="panel producer" rx="12" />
+  <text x="70" y="158" class="label">Python Producer</text>
+  <text x="70" y="186" class="small">Simulated buy/sell events</text>
+  <text x="70" y="209" class="small">Out-of-order timestamps</text>
+  <text x="70" y="232" class="small">Invalid and anomalous trades</text>
+
+  <rect x="315" y="105" width="228" height="170" class="panel kafka" rx="12" />
+  <text x="348" y="145" class="label">Kafka Topics</text>
+  <rect x="346" y="166" width="166" height="28" class="badge" />
+  <text x="364" y="185" class="tiny">stock-trades</text>
+  <rect x="346" y="202" width="166" height="28" class="badge" />
+  <text x="364" y="221" class="tiny">stock-trades-dlq</text>
+  <rect x="346" y="238" width="166" height="28" class="badge" />
+  <text x="364" y="257" class="tiny">serving topics</text>
+
+  <rect x="612" y="118" width="246" height="132" class="panel spark" rx="12" />
+  <text x="644" y="158" class="label">Spark Streaming</text>
+  <text x="644" y="186" class="small">Watermarks and windows</text>
+  <text x="644" y="209" class="small">Deduplication by trade_id</text>
+  <text x="644" y="232" class="small">DLQ and anomaly routing</text>
+
+  <rect x="930" y="78" width="220" height="246" class="panel delta" rx="12" />
+  <text x="973" y="118" class="label">Delta Lake</text>
+  <rect x="962" y="142" width="156" height="38" class="badge" />
+  <text x="983" y="166" class="tiny">Bronze raw</text>
+  <rect x="962" y="192" width="156" height="38" class="badge" />
+  <text x="984" y="216" class="tiny">Silver valid</text>
+  <rect x="962" y="242" width="156" height="38" class="badge" />
+  <text x="979" y="266" class="tiny">Gold aggregates</text>
+
+  <rect x="100" y="392" width="250" height="136" class="panel serve" rx="12" />
+  <text x="135" y="431" class="label">Streamlit Dashboard</text>
+  <text x="135" y="459" class="small">Live metrics</text>
+  <text x="135" y="482" class="small">VWAP and notional charts</text>
+  <text x="135" y="505" class="small">Latest anomaly table</text>
+
+  <rect x="470" y="392" width="270" height="136" class="panel ops" rx="12" />
+  <text x="504" y="431" class="label">Airflow Batch Backfill</text>
+  <text x="504" y="459" class="small">Daily symbol reconciliation</text>
+  <text x="504" y="482" class="small">Quality checks</text>
+  <text x="504" y="505" class="small">Lambda-style correction path</text>
+
+  <rect x="850" y="392" width="260" height="176" class="panel serve" rx="12" />
+  <text x="894" y="431" class="label">Snowflake Path</text>
+  <text x="884" y="459" class="small">Kafka Connector template</text>
+  <text x="884" y="482" class="small">Bronze VARIANT table</text>
+  <text x="884" y="505" class="small">Streams and Tasks</text>
+  <text x="884" y="528" class="small">Silver/Gold SQL transforms</text>
+  <text x="884" y="551" class="small">Live validation script</text>
+
+  <rect x="250" y="625" width="700" height="78" class="panel" rx="12" />
+  <text x="288" y="657" class="label">Operational Controls</text>
+  <text x="288" y="684" class="small">Producer idempotence, checkpointed sinks, maxOffsetsPerTrigger, lag monitoring, DLQ replay, CI checks, and Dockerized local demo.</text>
+
+  <path d="M 248 184 L 315 184" class="arrow" />
+  <path d="M 543 184 L 612 184" class="arrow" />
+  <path d="M 858 184 L 930 184" class="arrow" />
+  <path d="M 1040 324 C 1040 360 285 348 242 392" class="arrow" />
+  <path d="M 1000 324 C 1000 368 650 348 620 392" class="arrow-soft" />
+  <path d="M 543 240 C 610 330 825 300 930 392" class="arrow-soft" />
+  <path d="M 735 250 C 704 378 805 383 850 430" class="arrow" />
+  <path d="M 735 250 C 684 572 520 578 600 625" class="arrow-soft" />
+
+  <text x="270" y="173" class="tiny">JSON events</text>
+  <text x="560" y="173" class="tiny">micro-batches</text>
+  <text x="875" y="173" class="tiny">medallion writes</text>
+  <text x="724" y="333" class="tiny">optional warehouse ingestion</text>
+</svg>

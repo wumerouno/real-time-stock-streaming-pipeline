@@ -14,24 +14,9 @@ Event-driven data engineering project that simulates stock market buy/sell event
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    Producer["Python stock event producer"] --> KafkaTrades["Kafka: stock-trades"]
-    KafkaTrades --> Spark["Spark Structured Streaming"]
-    Spark --> Bronze["Delta Bronze: raw_trades"]
-    Spark --> Silver["Delta Silver: valid_trades"]
-    Spark --> DLQ["Kafka: stock-trades-dlq"]
-    Spark --> AnomalyTopic["Kafka: stock-anomalies"]
-    Spark --> AggregateTopic["Kafka: stock-aggregates"]
-    Silver --> GoldWindows["Delta Gold: windows"]
-    Silver --> GoldAnomalies["Delta Gold: anomalies"]
-    GoldWindows --> Dashboard["Streamlit dashboard"]
-    KafkaTrades -. "Kafka Connector" .-> SnowflakeBronze["Snowflake Bronze VARIANT"]
-    SnowflakeBronze --> SnowflakeTasks["Snowflake Streams + Tasks"]
-    SnowflakeTasks --> SnowflakeGold["Snowflake Silver/Gold"]
-    Silver --> Batch["Daily Spark backfill"]
-    Batch --> DailyGold["Delta Gold: daily summary"]
-```
+![Real-time stock streaming architecture](docs/assets/architecture.svg)
+
+The local path runs producer-to-Kafka-to-Spark-to-Delta with a Streamlit dashboard. The Snowflake path is available as a validated cloud-warehouse integration using Kafka Connector assets plus Snowflake Streams and Tasks.
 
 ## Demo Evidence
 
