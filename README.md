@@ -33,6 +33,17 @@ flowchart LR
     Batch --> DailyGold["Delta Gold: daily summary"]
 ```
 
+## Demo Evidence
+
+This repository includes screenshots and local run evidence from the Docker demo:
+
+- [Streamlit dashboard](docs/assets/demo/streamlit-dashboard.png)
+- [Kafka UI topic throughput](docs/assets/demo/kafka-ui.png)
+- [Spark Master UI running application](docs/assets/demo/spark-master-ui.png)
+- [Detailed demo evidence](docs/DEMO_EVIDENCE.md)
+
+![Streamlit dashboard](docs/assets/demo/streamlit-dashboard.png)
+
 ## Repository Layout
 
 ```text
@@ -209,6 +220,15 @@ The runnable local path uses Delta Lake. The Snowflake folder adds a production 
 3. Run `snowflake/02_streams_tasks.sql` to transform bronze `VARIANT` data into silver/gold tables.
 
 The Snowflake warehouse uses `AUTO_SUSPEND = 60` and `AUTO_RESUME = TRUE` for cost control.
+
+For live validation against a Snowflake account, configure `SNOWFLAKE_*` values in `.env`, install the Snowflake extra, and run:
+
+```powershell
+python -m pip install -e ".[snowflake]"
+python scripts/validate_snowflake.py
+```
+
+See [Snowflake validation](docs/SNOWFLAKE_VALIDATION.md) for the exact checks and expected output.
 
 ## Batch Plus Streaming
 
