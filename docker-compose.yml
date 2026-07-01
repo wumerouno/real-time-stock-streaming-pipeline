@@ -70,7 +70,7 @@ services:
       - ./:/opt/stock-pipeline
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      EVENT_RATE_PER_SECOND: 100
+      EVENT_RATE_PER_SECOND: ${EVENT_RATE_PER_SECOND:-100}
       PYTHONUNBUFFERED: "1"
     command: >
       sh -c "python -m pip install --quiet -e . &&

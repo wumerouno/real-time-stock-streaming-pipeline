@@ -2,6 +2,20 @@
 
 ## Local Startup
 
+Start the full Docker demo from the project root:
+
+```powershell
+.\scripts\start_demo.ps1
+```
+
+The script starts Kafka, Kafka UI, Spark master/worker, the producer, the Spark streaming job, and the Streamlit dashboard. To change the producer rate:
+
+```powershell
+.\scripts\start_demo.ps1 -EventRatePerSecond 250
+```
+
+Manual startup is still available when debugging individual services:
+
 ```powershell
 docker compose up -d zookeeper kafka kafka-ui spark-master spark-worker
 docker compose run --rm topic-init
@@ -11,13 +25,14 @@ docker compose exec spark-master spark-submit `
   --conf spark.jars.ivy=/tmp/.ivy2 `
   --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,io.delta:delta-spark_2.12:3.2.0 `
   /opt/stock-pipeline/spark/stock_streaming_job.py
-streamlit run dashboard/streamlit_app.py
+docker compose --profile dashboard up dashboard
 ```
 
 ## Observability
 
 - Kafka UI: `http://localhost:8080`
-- Spark UI: `http://localhost:4040`
+- Spark Master UI: `http://localhost:8081`
+- Streamlit dashboard: `http://localhost:8501`
 - Delta outputs: `data/delta`
 - Checkpoints: `data/checkpoints`
 - DLQ topic: `stock-trades-dlq`
@@ -51,3 +66,9 @@ Actions:
 - Invalid events go to `stock-trades-dlq` with validation reason and raw payload.
 - Keep checkpoints when restarting Spark; deleting checkpoints reprocesses from configured Kafka offsets.
 - Reprocess DLQ records only after fixing the schema or producer defect that caused the failure.
+
+## Shutdown
+
+```powershell
+docker compose --profile runtime --profile dashboard down
+```

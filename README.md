@@ -48,6 +48,36 @@ tests/                           Unit tests for event validation and anomaly rul
 
 ## Quick Start
 
+### One-Command Docker Demo
+
+Start the full local demo from the project root:
+
+```powershell
+.\scripts\start_demo.ps1
+```
+
+This starts Kafka, Kafka UI, Spark master/worker, the stock event producer, the Spark Structured Streaming job, and the Streamlit dashboard.
+
+Useful local URLs:
+
+- Kafka UI: [http://localhost:8080](http://localhost:8080)
+- Spark Master UI: [http://localhost:8081](http://localhost:8081)
+- Streamlit dashboard: [http://localhost:8501](http://localhost:8501)
+
+Optional producer rate override:
+
+```powershell
+.\scripts\start_demo.ps1 -EventRatePerSecond 250
+```
+
+Stop the demo:
+
+```powershell
+docker compose --profile runtime --profile dashboard down
+```
+
+### Manual Startup
+
 1. Copy the environment template.
 
    ```powershell
@@ -77,14 +107,10 @@ tests/                           Unit tests for event validation and anomaly rul
      /opt/stock-pipeline/spark/stock_streaming_job.py
    ```
 
-5. Optional: run the dashboard locally after installing dashboard dependencies.
+5. Optional: run the Dockerized dashboard.
 
    ```powershell
-   python -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   python -m pip install --upgrade pip
-   python -m pip install -e ".[dashboard]"
-   streamlit run dashboard/streamlit_app.py
+   docker compose --profile dashboard up dashboard
    ```
 
 If you already have a Python 3.10-3.12 runtime available, you can also run the producer and Spark submit helper directly on the host:
@@ -96,7 +122,7 @@ If you already have a Python 3.10-3.12 runtime available, you can also run the p
    .\scripts\submit_streaming_job.ps1
    ```
 
-Kafka UI runs at [http://localhost:8080](http://localhost:8080). Spark UI runs at [http://localhost:4040](http://localhost:4040) for local Spark jobs.
+Kafka UI runs at [http://localhost:8080](http://localhost:8080). The Docker Spark master UI runs at [http://localhost:8081](http://localhost:8081). The Streamlit dashboard runs at [http://localhost:8501](http://localhost:8501). If you run Spark directly on the host, the local Spark driver UI is usually [http://localhost:4040](http://localhost:4040).
 
 ## Event Model
 
