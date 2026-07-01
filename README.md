@@ -56,7 +56,7 @@ Start the full local demo from the project root:
 .\scripts\start_demo.ps1
 ```
 
-This starts Kafka, Kafka UI, Spark master/worker, the stock event producer, the Spark Structured Streaming job, and the Streamlit dashboard.
+This starts Kafka, Kafka UI, Spark master/worker, the stock event producer, the Spark Structured Streaming job, and the Streamlit dashboard. The dashboard runs from a small Docker image with Streamlit dependencies baked in, so normal restarts do not reinstall packages.
 
 Useful local URLs:
 
@@ -68,6 +68,12 @@ Optional producer rate override:
 
 ```powershell
 .\scripts\start_demo.ps1 -EventRatePerSecond 250
+```
+
+Rebuild the dashboard image after changing `Dockerfile.dashboard` or `requirements-dashboard.txt`:
+
+```powershell
+.\scripts\start_demo.ps1 -RebuildDashboard
 ```
 
 Stop the demo:
@@ -110,7 +116,7 @@ docker compose --profile runtime --profile dashboard down
 5. Optional: run the Dockerized dashboard.
 
    ```powershell
-   docker compose --profile dashboard up dashboard
+   docker compose --profile dashboard up --build dashboard
    ```
 
 If you already have a Python 3.10-3.12 runtime available, you can also run the producer and Spark submit helper directly on the host:

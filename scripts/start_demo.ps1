@@ -1,5 +1,6 @@
 param(
     [int]$EventRatePerSecond = 100,
+    [switch]$RebuildDashboard,
     [switch]$SkipWait
 )
 
@@ -83,7 +84,12 @@ $env:EVENT_RATE_PER_SECOND = "$EventRatePerSecond"
 Invoke-Docker -Arguments @("compose", "--profile", "runtime", "up", "-d", "producer")
 
 Write-Host "Starting Streamlit dashboard..."
-Invoke-Docker -Arguments @("compose", "--profile", "dashboard", "up", "-d", "dashboard")
+$dashboardArgs = @("compose", "--profile", "dashboard", "up", "-d")
+if ($RebuildDashboard) {
+    $dashboardArgs += "--build"
+}
+$dashboardArgs += "dashboard"
+Invoke-Docker -Arguments $dashboardArgs
 
 if (Test-SparkStreamingJob) {
     Write-Host "Spark streaming job is already running."

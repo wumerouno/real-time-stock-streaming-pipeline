@@ -8,10 +8,16 @@ Start the full Docker demo from the project root:
 .\scripts\start_demo.ps1
 ```
 
-The script starts Kafka, Kafka UI, Spark master/worker, the producer, the Spark streaming job, and the Streamlit dashboard. To change the producer rate:
+The script starts Kafka, Kafka UI, Spark master/worker, the producer, the Spark streaming job, and the Streamlit dashboard. The dashboard uses a prebuilt local image so normal restarts do not reinstall Python packages. To change the producer rate:
 
 ```powershell
 .\scripts\start_demo.ps1 -EventRatePerSecond 250
+```
+
+Rebuild the dashboard image after changing `Dockerfile.dashboard` or `requirements-dashboard.txt`:
+
+```powershell
+.\scripts\start_demo.ps1 -RebuildDashboard
 ```
 
 Manual startup is still available when debugging individual services:
@@ -25,7 +31,7 @@ docker compose exec spark-master spark-submit `
   --conf spark.jars.ivy=/tmp/.ivy2 `
   --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,io.delta:delta-spark_2.12:3.2.0 `
   /opt/stock-pipeline/spark/stock_streaming_job.py
-docker compose --profile dashboard up dashboard
+docker compose --profile dashboard up --build dashboard
 ```
 
 ## Observability
